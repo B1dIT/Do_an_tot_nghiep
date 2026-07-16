@@ -64,14 +64,13 @@ def scrape_job_detail(driver, job_url):
         "company_url_from_job": None
     }
 
-# Sửa lại cấu trúc URL trong hàm run_glints_crawler của file scrape_glints.py
 def run_glints_crawler(keywords, headless=False):
     print("\n🚀 [GLINTS] Bắt đầu quét tuần tra...")
     seen = database.get_all_seen_keys()
     driver = build_driver(headless=headless)
     try:
         for kw in keywords:
-            # 🎯 ĐÃ CẬP NHẬT: Đường link tìm kiếm chuẩn không bị 404 của Glints
+            
             query_str = kw.replace(" ", "%20")
             url = f"https://glints.com/vn/vi/opportunities/jobs?q={query_str}"
             
@@ -82,7 +81,7 @@ def run_glints_crawler(keywords, headless=False):
             soup = BeautifulSoup(driver.html, "lxml")
             jobs = []
             
-            # Cập nhật bộ chọn thẻ bao bọc Job Card của Glints
+            
             cards = soup.select("[class*='JobCardsc__JobCardContainer'], [class*='CompactJobCardsc__CardContainer'], div[class*='Card']")
             
             for card in cards:

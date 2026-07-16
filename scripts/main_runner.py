@@ -18,15 +18,12 @@ if __name__ == "__main__":
     while True:
         print(f"\n🔔 KHỞI ĐỘNG CHU KỲ TUẦN TRA REAL-TIME THỨ #{chu_ky} lúc: {time.strftime('%H:%M:%S')}")
         
-        # 1. Quét nguồn TopCV
         try: run_topcv_crawler(KEYWORDS_IT, headless=False)
         except Exception as e: print(f"❌ Lỗi chu kỳ TopCV: {e}")
         
-        # 2. Quét nguồn ITViec
         try: run_itviec_crawler(KEYWORDS_IT, headless=False)
         except Exception as e: print(f"❌ Lỗi chu kỳ ITViec: {e}")
         
-        # 3. Quét nguồn Glints
         try: run_glints_crawler(KEYWORDS_IT, headless=False)
         except Exception as e: print(f"❌ Lỗi chu kỳ Glints: {e}")
         

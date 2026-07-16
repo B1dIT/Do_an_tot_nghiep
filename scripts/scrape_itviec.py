@@ -25,33 +25,26 @@ def build_driver(headless=False):
 
 def parse_search_page(driver, url):
     driver.get(url)
-    driver.wait(4, 6) # Đợi trang tải xong hoàn toàn cấu trúc chia đôi
+    driver.wait(4, 6)
     
     soup = BeautifulSoup(driver.html, "lxml")
     jobs = []
     
-    # 🎯 ĐÃ CẬP NHẬT: Nhắm thẳng vào container chứa danh sách job bên trái (id="search-results-list")
-    # để tránh bị cào nhầm sang phần chi tiết bên phải hoặc phần quảng cáo ở trên.
     job_cards = soup.select("#search-results-list div[data-testid='job-card'], #search-results-list .job-card")
     
-    # Nếu bộ chọn id không ăn, ta dự phòng quét qua class job-card tổng quát
     if not job_cards:
         job_cards = soup.select("div[data-testid='job-card'], div[class*='job-card'], div.job_item")
 
     print(f"   [Search] Tìm thấy {len(job_cards)} thẻ job trên giao diện.")
 
     for item in job_cards:
-        # Lấy tiêu đề và Link Job từ thẻ h3/h2 nằm trong card
         a_title = item.select_one("h3 a[href], h2 a[href], a[href*='/it-jobs/']")
         if not a_title: continue
         
-        # Bóc tách tên công ty
         comp_el = item.select_one("div.job-card__company-name a, [class*='company'] a, span[class*='company']")
         
-        # Bóc tách mức lương công khai tại card
         salary_el = item.select_one(".job-card__salary-text, [class*='salary']")
         
-        # Bóc tách địa điểm
         loc_el = item.select_one(".job-card__location, [class*='location']")
 
         jobs.append({
@@ -66,17 +59,14 @@ def parse_search_page(driver, url):
     return jobs
 
 def scrape_job_detail(driver, job_url):
-    """Cào chi tiết Job khi click vào link cụ thể"""
     driver.get(job_url)
     driver.wait(2, 4)
     soup = BeautifulSoup(driver.html, "lxml")
     
-    # Bóc tách 3 vùng nội dung lớn: Mô tả, Yêu cầu, Quyền lợi
     desc_mota = soup.select_one("div.job-description__details, [class*='description__details']")
     desc_yeucau = soup.select_one("div.job-description__requirements, [class*='description__requirements']")
     desc_quyenloi = soup.select_one("div.job-description__benefits, [class*='description__benefits']")
     
-    # Gom các tag công nghệ (Java, Python, .Net...)
     tags = [text(t) for t in soup.select(".job-details__tags .tag, [class*='tags'] .tag")]
     
     return {
@@ -100,7 +90,6 @@ def run_itviec_crawler(keywords, headless=False):
     driver = build_driver(headless=headless)
     try:
         for kw in keywords:
-            # Mã hóa dấu cách thành dấu cộng (+) chuẩn chỉ theo đúng ảnh screenshot của bạn
             query_str = kw.replace(" ", "+")
             url = f"https://itviec.com/it-jobs?q={query_str}"
             
