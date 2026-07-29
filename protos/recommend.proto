@@ -2,8 +2,11 @@ syntax = "proto3";
 
 package ai_service;
 
-service CVRecommender {
+service AIService {
   rpc AnalyzeCV (CVRequest) returns (CVResponse) {}
+  rpc StartInterview (InterviewRequest) returns (InterviewResponse) {}
+  rpc ChatInterview (ChatRequest) returns (ChatResponse) {}
+  rpc EndInterview (EndRequest) returns (EvaluationResponse) {}
 }
 
 message CVRequest {
@@ -16,8 +19,53 @@ message JobItem {
   string company = 3;
   string job_url = 4;
   string match_reason = 5;
+  string jd_text = 6;
 }
 
 message CVResponse {
   repeated JobItem recommended_jobs = 1;
+}
+
+message InterviewRequest {
+  string cv_text = 1;
+  string job_title = 2;
+  string company = 3;
+  string jd_text = 4;
+  string language = 5;
+  int32 num_questions = 6;
+  string difficulty = 7;
+}
+
+message InterviewResponse {
+  string session_id = 1;
+  string initial_message = 2;
+}
+
+message ChatRequest {
+  string session_id = 1;
+  string user_message = 2;
+}
+
+message ChatResponse {
+  string ai_message = 1;
+  bool is_finished = 2;
+}
+
+message EndRequest {
+  string session_id = 1;
+}
+
+message DetailedFeedback {
+  string question = 1;
+  string user_answer = 2;
+  int32 score = 3;
+  string suggested_answer = 4;
+}
+
+message EvaluationResponse {
+  int32 overall_score = 1;
+  string summary = 2;
+  repeated string strengths = 3;
+  repeated string improvements = 4;
+  repeated DetailedFeedback detailed_feedback = 5;
 }

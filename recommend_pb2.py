@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0frecommend.proto\x12\nai_service\"\x1c\n\tCVRequest\x12\x0f\n\x07\x63v_text\x18\x01 \x01(\t\"\\\n\x07JobItem\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0f\n\x07\x63ompany\x18\x03 \x01(\t\x12\x0f\n\x07job_url\x18\x04 \x01(\t\x12\x14\n\x0cmatch_reason\x18\x05 \x01(\t\";\n\nCVResponse\x12-\n\x10recommended_jobs\x18\x01 \x03(\x0b\x32\x13.ai_service.JobItem2M\n\rCVRecommender\x12<\n\tAnalyzeCV\x12\x15.ai_service.CVRequest\x1a\x16.ai_service.CVResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0frecommend.proto\x12\nai_service\"\x1c\n\tCVRequest\x12\x0f\n\x07\x63v_text\x18\x01 \x01(\t\"m\n\x07JobItem\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0f\n\x07\x63ompany\x18\x03 \x01(\t\x12\x0f\n\x07job_url\x18\x04 \x01(\t\x12\x14\n\x0cmatch_reason\x18\x05 \x01(\t\x12\x0f\n\x07jd_text\x18\x06 \x01(\t\";\n\nCVResponse\x12-\n\x10recommended_jobs\x18\x01 \x03(\x0b\x32\x13.ai_service.JobItem\"\x95\x01\n\x10InterviewRequest\x12\x0f\n\x07\x63v_text\x18\x01 \x01(\t\x12\x11\n\tjob_title\x18\x02 \x01(\t\x12\x0f\n\x07\x63ompany\x18\x03 \x01(\t\x12\x0f\n\x07jd_text\x18\x04 \x01(\t\x12\x10\n\x08language\x18\x05 \x01(\t\x12\x15\n\rnum_questions\x18\x06 \x01(\x05\x12\x12\n\ndifficulty\x18\x07 \x01(\t\"@\n\x11InterviewResponse\x12\x12\n\nsession_id\x18\x01 \x01(\t\x12\x17\n\x0finitial_message\x18\x02 \x01(\t\"7\n\x0b\x43hatRequest\x12\x12\n\nsession_id\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\"7\n\x0c\x43hatResponse\x12\x12\n\nai_message\x18\x01 \x01(\t\x12\x13\n\x0bis_finished\x18\x02 \x01(\x08\" \n\nEndRequest\x12\x12\n\nsession_id\x18\x01 \x01(\t\"b\n\x10\x44\x65tailedFeedback\x12\x10\n\x08question\x18\x01 \x01(\t\x12\x13\n\x0buser_answer\x18\x02 \x01(\t\x12\r\n\x05score\x18\x03 \x01(\x05\x12\x18\n\x10suggested_answer\x18\x04 \x01(\t\"\x9e\x01\n\x12\x45valuationResponse\x12\x15\n\roverall_score\x18\x01 \x01(\x05\x12\x0f\n\x07summary\x18\x02 \x01(\t\x12\x11\n\tstrengths\x18\x03 \x03(\t\x12\x14\n\x0cimprovements\x18\x04 \x03(\t\x12\x37\n\x11\x64\x65tailed_feedback\x18\x05 \x03(\x0b\x32\x1c.ai_service.DetailedFeedback2\xaa\x02\n\tAIService\x12<\n\tAnalyzeCV\x12\x15.ai_service.CVRequest\x1a\x16.ai_service.CVResponse\"\x00\x12O\n\x0eStartInterview\x12\x1c.ai_service.InterviewRequest\x1a\x1d.ai_service.InterviewResponse\"\x00\x12\x44\n\rChatInterview\x12\x17.ai_service.ChatRequest\x1a\x18.ai_service.ChatResponse\"\x00\x12H\n\x0c\x45ndInterview\x12\x16.ai_service.EndRequest\x1a\x1e.ai_service.EvaluationResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,9 +34,23 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CVREQUEST']._serialized_start=31
   _globals['_CVREQUEST']._serialized_end=59
   _globals['_JOBITEM']._serialized_start=61
-  _globals['_JOBITEM']._serialized_end=153
-  _globals['_CVRESPONSE']._serialized_start=155
-  _globals['_CVRESPONSE']._serialized_end=214
-  _globals['_CVRECOMMENDER']._serialized_start=216
-  _globals['_CVRECOMMENDER']._serialized_end=293
+  _globals['_JOBITEM']._serialized_end=170
+  _globals['_CVRESPONSE']._serialized_start=172
+  _globals['_CVRESPONSE']._serialized_end=231
+  _globals['_INTERVIEWREQUEST']._serialized_start=234
+  _globals['_INTERVIEWREQUEST']._serialized_end=383
+  _globals['_INTERVIEWRESPONSE']._serialized_start=385
+  _globals['_INTERVIEWRESPONSE']._serialized_end=449
+  _globals['_CHATREQUEST']._serialized_start=451
+  _globals['_CHATREQUEST']._serialized_end=506
+  _globals['_CHATRESPONSE']._serialized_start=508
+  _globals['_CHATRESPONSE']._serialized_end=563
+  _globals['_ENDREQUEST']._serialized_start=565
+  _globals['_ENDREQUEST']._serialized_end=597
+  _globals['_DETAILEDFEEDBACK']._serialized_start=599
+  _globals['_DETAILEDFEEDBACK']._serialized_end=697
+  _globals['_EVALUATIONRESPONSE']._serialized_start=700
+  _globals['_EVALUATIONRESPONSE']._serialized_end=858
+  _globals['_AISERVICE']._serialized_start=861
+  _globals['_AISERVICE']._serialized_end=1159
 # @@protoc_insertion_point(module_scope)

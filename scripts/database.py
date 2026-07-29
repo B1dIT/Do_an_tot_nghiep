@@ -2,28 +2,39 @@
 from sqlalchemy import create_engine, text
 import pandas as pd
 from urllib.parse import urlparse
+from datetime import datetime, timedelta
 
 
-DB_USER = "postgres"                   
-DB_PASS = "160105"      
+DB_USER = "postgres"
+DB_PASS = "160105"
 DB_HOST = "localhost"
-DB_PORT = "5432"                       
-DB_NAME = "do_an_tot_nghiep"           
-
+DB_PORT = "5432"
+DB_NAME = "do_an_tot_nghiep"
 
 CONNECTION_STR = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+DATA_COLUMNS = [
+    "job_key", "title", "detail_title", "job_url", "company",
+    "company_name_full", "company_url", "company_url_from_job",
+    "salary_list", "detail_salary", "address_list", "detail_location",
+    "exp_list", "detail_experience", "deadline", "tags",
+    "working_addresses", "working_times", "desc_mota", "desc_yeucau",
+    "desc_quyenloi", "company_website", "company_size", "company_industry",
+    "company_address", "company_description", "source", "keyword",
+    "salary_min", "salary_max",
+]
+
+
 def init_database():
-    """Hàm tự động khởi tạo bảng dữ liệu chuẩn hóa trong Postgres"""
     engine = create_engine(CONNECTION_STR)
-    
+
     create_table_query = """
     CREATE TABLE IF NOT EXISTS jobs_data (
-        id SERIAL PRIMARY KEY,              -- Tự động tăng tăng định dạng Postgres
-        job_key VARCHAR(100) UNIQUE,        -- Khóa duy nhất dùng đuôi URL để chặn trùng
+        id SERIAL PRIMARY KEY,
+        job_key VARCHAR(100),
         title VARCHAR(255),
         detail_title VARCHAR(255),
-        job_url TEXT,
+        job_url TEXT NOT NULL,
         company VARCHAR(255),
         company_name_full VARCHAR(255),
         company_url TEXT,
@@ -46,19 +57,55 @@ def init_database():
         company_industry VARCHAR(255),
         company_address TEXT,
         company_description TEXT,
-        source VARCHAR(50),                  -- Nhãn nhận diện: 'TopCV', 'ITViec', 'Glints'
-        keyword VARCHAR(50),                 -- Nhãn phân loại ngành: 'Frontend', 'Flutter'...
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        source VARCHAR(50),
+        keyword VARCHAR(50),
+        salary_min NUMERIC,
+        salary_max NUMERIC,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expired_at TIMESTAMP,
+        status VARCHAR(20) DEFAULT 'ACTIVE',
+        CONSTRAINT uq_jobs_data_job_url UNIQUE (job_url)
     );
     """
+
     with engine.connect() as conn:
-        with conn.begin():
-            conn.execute(text(create_table_query))
-    print(f"✅ [POSTGRES] Đã đồng bộ cấu trúc bảng 'jobs_data' trong database '{DB_NAME}'!")
+        conn.execute(text(create_table_query))
+        for col, col_def in [
+            ("updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+            ("expired_at", "TIMESTAMP"),
+            ("status", "VARCHAR(20) DEFAULT 'ACTIVE'"),
+            ("salary_min", "NUMERIC"),
+            ("salary_max", "NUMERIC"),
+        ]:
+            try:
+                conn.execute(text(f"ALTER TABLE jobs_data ADD COLUMN IF NOT EXISTS {col} {col_def}"))
+            except Exception:
+                pass
+        try:
+            conn.execute(text("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conname = 'uq_jobs_data_job_url'
+                    ) THEN
+                        DELETE FROM jobs_data a
+                        USING jobs_data b
+                        WHERE a.id > b.id AND a.job_url = b.job_url;
+                        ALTER TABLE jobs_data ADD CONSTRAINT uq_jobs_data_job_url UNIQUE (job_url);
+                    END IF;
+                END $$;
+            """))
+        except Exception:
+            pass
+        conn.execute(text(
+            "CREATE INDEX IF NOT EXISTS idx_jobs_status_expired ON jobs_data (status, expired_at)"
+        ))
+        conn.commit()
 
 
-def get_all_seen_keys() -> set:
-    """Đọc nhanh danh sách khóa cũ trong Postgres để kích hoạt bộ lọc trùng real-time"""
+def get_all_seen_keys():
     engine = create_engine(CONNECTION_STR)
     try:
         with engine.connect() as conn:
@@ -68,8 +115,18 @@ def get_all_seen_keys() -> set:
         return set()
 
 
+def _parse_expired_at(job_dict: dict):
+    deadline = job_dict.get("deadline")
+    if deadline:
+        try:
+            return pd.to_datetime(deadline)
+        except Exception:
+            pass
+    # Default: 30 days from insert
+    return datetime.now() + timedelta(days=30)
+
+
 def insert_job_to_postgres(job_dict: dict) -> bool:
-    """Chèn một bản ghi Job sạch vào Postgres, tự bỏ qua nếu dính trùng khóa UNIQUE"""
     engine = create_engine(CONNECTION_STR)
     try:
         src_label = job_dict.get("source", "").lower() + "_"
@@ -78,12 +135,52 @@ def insert_job_to_postgres(job_dict: dict) -> bool:
     except Exception:
         return False
 
-    df = pd.DataFrame([job_dict])
+    expired_at = _parse_expired_at(job_dict)
+
+    col_list = ", ".join(DATA_COLUMNS)
+    val_list = ", ".join([f":{c}" for c in DATA_COLUMNS])
+
+    upsert_query = f"""
+        INSERT INTO jobs_data ({col_list}, created_at, updated_at, expired_at, status)
+        VALUES ({val_list}, NOW(), NOW(), :expired_at, 'ACTIVE')
+        ON CONFLICT (job_url) DO UPDATE SET
+            updated_at = NOW(),
+            expired_at = COALESCE(EXCLUDED.expired_at, jobs_data.expired_at),
+            status = 'ACTIVE'
+    """
+
     try:
-        df.to_sql("jobs_data", con=engine, if_exists="append", index=False)
+        with engine.connect() as conn:
+            params = {col: job_dict.get(col) for col in DATA_COLUMNS}
+            params["expired_at"] = expired_at
+            conn.execute(text(upsert_query), params)
+            conn.commit()
         return True
-    except Exception:
+    except Exception as e:
+        print(f"   [DB] Upsert error for {job_dict.get('job_key', '?' )}: {e}")
         return False
+
+
+def mark_expired_jobs() -> int:
+    engine = create_engine(CONNECTION_STR)
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("""
+                UPDATE jobs_data
+                SET status = 'EXPIRED', updated_at = NOW()
+                WHERE expired_at IS NOT NULL
+                  AND expired_at < NOW()
+                  AND status = 'ACTIVE'
+            """))
+            conn.commit()
+            count = result.rowcount
+            if count > 0:
+                print(f"   [Cron] Marked {count} jobs EXPIRED.")
+            return count
+    except Exception as e:
+        print(f"   [DB] Error updating expired jobs: {e}")
+        return 0
+
 
 if __name__ == "__main__":
     init_database()

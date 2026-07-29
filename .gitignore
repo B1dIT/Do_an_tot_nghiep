@@ -11,3 +11,4 @@ wheels/
 
 # Credential files
 credentials/xom-service-account.json
+.env

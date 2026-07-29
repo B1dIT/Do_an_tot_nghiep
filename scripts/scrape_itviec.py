@@ -50,7 +50,7 @@ def parse_search_page(driver, url):
         jobs.append({
             "title":        text(a_title),
             "job_url":      urljoin(BASE, a_title.get("href")),
-            "company":      text(comp_el) if comp_el else "Công ty ẩn danh",
+            "company":      text(comp_el) if comp_el else "Doanh nghiệp Hàng đầu",
             "company_url":  urljoin(BASE, comp_el.get("href")) if (comp_el and comp_el.get("href")) else None,
             "salary_list":  text(salary_el) if salary_el else "Sign in to view salary",
             "address_list": text(loc_el) if loc_el else "Việt Nam",

@@ -49,7 +49,7 @@ def parse_search_page(driver, url):
         jobs.append({
             "title":        text(a_title),
             "job_url":      urljoin(BASE, a_title.get("href")),
-            "company":      text(job.select_one("a.company .company-name")),
+            "company":      text(job.select_one("a.company .company-name")) or "Doanh nghiệp Hàng đầu",
             "company_url":  urljoin(BASE, comp_a.get("href")) if comp_a else None,
             "salary_list":  text(job.select_one("label.title-salary")),
             "address_list": text(job.select_one("label.address .city-text")),

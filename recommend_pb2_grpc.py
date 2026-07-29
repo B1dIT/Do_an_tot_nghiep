@@ -25,9 +25,8 @@ if _version_not_supported:
     )
 
 
-class CVRecommenderStub:
-    """1. Định nghĩa các hàm mà Python sẽ cung cấp cho Node.js gọi
-    """
+class AIServiceStub:
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -36,42 +35,87 @@ class CVRecommenderStub:
             channel: A grpc.Channel.
         """
         self.AnalyzeCV = channel.unary_unary(
-                '/ai_service.CVRecommender/AnalyzeCV',
+                '/ai_service.AIService/AnalyzeCV',
                 request_serializer=recommend__pb2.CVRequest.SerializeToString,
                 response_deserializer=recommend__pb2.CVResponse.FromString,
                 _registered_method=True)
+        self.StartInterview = channel.unary_unary(
+                '/ai_service.AIService/StartInterview',
+                request_serializer=recommend__pb2.InterviewRequest.SerializeToString,
+                response_deserializer=recommend__pb2.InterviewResponse.FromString,
+                _registered_method=True)
+        self.ChatInterview = channel.unary_unary(
+                '/ai_service.AIService/ChatInterview',
+                request_serializer=recommend__pb2.ChatRequest.SerializeToString,
+                response_deserializer=recommend__pb2.ChatResponse.FromString,
+                _registered_method=True)
+        self.EndInterview = channel.unary_unary(
+                '/ai_service.AIService/EndInterview',
+                request_serializer=recommend__pb2.EndRequest.SerializeToString,
+                response_deserializer=recommend__pb2.EvaluationResponse.FromString,
+                _registered_method=True)
 
 
-class CVRecommenderServicer:
-    """1. Định nghĩa các hàm mà Python sẽ cung cấp cho Node.js gọi
-    """
+class AIServiceServicer:
+    """Missing associated documentation comment in .proto file."""
 
     def AnalyzeCV(self, request, context):
-        """Hàm phân tích CV: Nhận vào Request, trả ra Response
-        """
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StartInterview(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ChatInterview(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def EndInterview(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_CVRecommenderServicer_to_server(servicer, server):
+def add_AIServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'AnalyzeCV': grpc.unary_unary_rpc_method_handler(
                     servicer.AnalyzeCV,
                     request_deserializer=recommend__pb2.CVRequest.FromString,
                     response_serializer=recommend__pb2.CVResponse.SerializeToString,
             ),
+            'StartInterview': grpc.unary_unary_rpc_method_handler(
+                    servicer.StartInterview,
+                    request_deserializer=recommend__pb2.InterviewRequest.FromString,
+                    response_serializer=recommend__pb2.InterviewResponse.SerializeToString,
+            ),
+            'ChatInterview': grpc.unary_unary_rpc_method_handler(
+                    servicer.ChatInterview,
+                    request_deserializer=recommend__pb2.ChatRequest.FromString,
+                    response_serializer=recommend__pb2.ChatResponse.SerializeToString,
+            ),
+            'EndInterview': grpc.unary_unary_rpc_method_handler(
+                    servicer.EndInterview,
+                    request_deserializer=recommend__pb2.EndRequest.FromString,
+                    response_serializer=recommend__pb2.EvaluationResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'ai_service.CVRecommender', rpc_method_handlers)
+            'ai_service.AIService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('ai_service.CVRecommender', rpc_method_handlers)
+    server.add_registered_method_handlers('ai_service.AIService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class CVRecommender:
-    """1. Định nghĩa các hàm mà Python sẽ cung cấp cho Node.js gọi
-    """
+class AIService:
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def AnalyzeCV(request,
@@ -87,9 +131,90 @@ class CVRecommender:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/ai_service.CVRecommender/AnalyzeCV',
+            '/ai_service.AIService/AnalyzeCV',
             recommend__pb2.CVRequest.SerializeToString,
             recommend__pb2.CVResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StartInterview(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ai_service.AIService/StartInterview',
+            recommend__pb2.InterviewRequest.SerializeToString,
+            recommend__pb2.InterviewResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ChatInterview(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ai_service.AIService/ChatInterview',
+            recommend__pb2.ChatRequest.SerializeToString,
+            recommend__pb2.ChatResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EndInterview(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ai_service.AIService/EndInterview',
+            recommend__pb2.EndRequest.SerializeToString,
+            recommend__pb2.EvaluationResponse.FromString,
             options,
             channel_credentials,
             insecure,

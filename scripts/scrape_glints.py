@@ -94,7 +94,7 @@ def run_glints_crawler(keywords, headless=False):
                 jobs.append({
                     "title":        text(title_a.select_one("h3, h2, span")) or text(title_a),
                     "job_url":      urljoin(BASE, title_a.get("href")),
-                    "company":      text(comp_a) if comp_a else "N/A",
+                    "company":      text(comp_a) if comp_a else "Doanh nghiệp Hàng đầu",
                     "company_url":  urljoin(BASE, comp_a.get("href")) if comp_a else None,
                     "salary_list":  text(salary_el) if salary_el else "Cạnh tranh",
                     "address_list": None,

@@ -18,17 +18,14 @@ def parse_salary(salary_str):
     
     salary_str = salary_str.lower().strip()
     
-    
     if any(x in salary_str for x in ["thỏa thuận", "thương lượng", "cạnh tranh", "sign in", "đăng nhập"]):
         return None, None
-        
-    
+
     numbers = [float(n) for n in re.findall(r"\d+\.?\d*", salary_str)]
     
     if not numbers:
         return None, None
         
-    
     if "triệu" in salary_str or "tr" in salary_str:
         if len(numbers) >= 2:
             return numbers[0], numbers[1]
@@ -36,15 +33,12 @@ def parse_salary(salary_str):
             if "từ" in salary_str: return numbers[0], None
             if "lên đến" in salary_str or "tới" in salary_str: return None, numbers[0]
             return numbers[0], numbers[0]
-            
-    
+
     if "usd" in salary_str or "$" in salary_str:
-        
-        usd_to_vnd = 0.0255 
+        usd_to_vnd = 0.0255
         if len(numbers) >= 2:
             return round(numbers[0] * numbers[1] * usd_to_vnd if numbers[0] < 100 else numbers[0] * usd_to_vnd, 1), round(numbers[1] * usd_to_vnd, 1)
         elif len(numbers) == 1:
-            
             actual_val = numbers[0]
             if len(re.findall(r"\d+,\d+", salary_str)) > 0:
                 actual_val = float(salary_str.replace(",", "").replace("$", "").replace("usd", "").strip())
@@ -59,12 +53,11 @@ def clean_database_salaries():
     df = pd.read_sql(query, con=engine)
     
     if df.empty:
-        print("✨ Không có dữ liệu lương mới nào cần làm sạch!")
+        print("No new salary data to clean.")
         return
-        
-    print(f"🔄 Đang xử lý làm sạch dữ liệu lương cho {len(df)} dòng...")
-    
-    
+
+    print(f"Processing salary cleanup for {len(df)} rows...")
+
     with engine.connect() as conn:
         with conn.begin():
             for idx, row in df.iterrows():
@@ -76,8 +69,8 @@ def clean_database_salaries():
                         WHERE id = :id
                     """)
                     conn.execute(update_query, {"s_min": s_min, "s_max": s_max, "id": int(row['id'])})
-                    
-    print("✅ Đã cập nhật các cột số `salary_min` và `salary_max` thành công!")
+
+    print("Salary columns `salary_min` and `salary_max` updated successfully.")
 
 if __name__ == "__main__":
     clean_database_salaries()

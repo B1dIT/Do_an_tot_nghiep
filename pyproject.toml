@@ -11,6 +11,7 @@ dependencies = [
     "lxml>=6.0.1",
     "matplotlib>=3.7.5",
     "openpyxl>=3.1.5",
+    "python-dotenv>=1.0.1",
     "pandas>=2.0.3",
     "requests>=2.32.4",
     "seaborn>=0.13.2",

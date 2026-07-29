@@ -12,23 +12,26 @@ KEYWORDS_IT = [
 if __name__ == "__main__":
     database.init_database()
     
-    print("\n=== ĐƯỜNG ỐNG REAL-TIME TOÀN NGÀNH IT (POSTGRES) SẴN SÀNG CHẠY ===")
+    print("\n=== REAL-TIME IT JOB PIPELINE (POSTGRES) READY ===")
     
-    chu_ky = 1
+    cycle = 1
     while True:
-        print(f"\n🔔 KHỞI ĐỘNG CHU KỲ TUẦN TRA REAL-TIME THỨ #{chu_ky} lúc: {time.strftime('%H:%M:%S')}")
+        print(f"\nStarting cycle #{cycle} at: {time.strftime('%H:%M:%S')}")
+        
+        print("   Scanning expired jobs...")
+        database.mark_expired_jobs()
         
         try: run_topcv_crawler(KEYWORDS_IT, headless=False)
-        except Exception as e: print(f"❌ Lỗi chu kỳ TopCV: {e}")
+        except Exception as e: print(f"TopCV error: {e}")
         
         try: run_itviec_crawler(KEYWORDS_IT, headless=False)
-        except Exception as e: print(f"❌ Lỗi chu kỳ ITViec: {e}")
+        except Exception as e: print(f"ITViec error: {e}")
         
         try: run_glints_crawler(KEYWORDS_IT, headless=False)
-        except Exception as e: print(f"❌ Lỗi chu kỳ Glints: {e}")
+        except Exception as e: print(f"Glints error: {e}")
         
-        print(f"\n💤 Hoàn tất chu kỳ #{chu_ky}. Toàn bộ job mới đã nằm an toàn trong Postgres!")
-        print("Hệ thống nghỉ 30 phút nhằm bảo vệ IP máy chủ trước chu kỳ sau...")
+        print(f"\nCycle #{cycle} complete. All new jobs saved to Postgres.")
+        print("Sleeping 30 minutes before next cycle...")
         
-        chu_ky += 1
+        cycle += 1
         time.sleep(1800)  

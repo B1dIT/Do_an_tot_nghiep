@@ -1,227 +1,162 @@
-# CRAWL TOPCV JOBS (Learning Purposes)
+# 🚀 AI-Powered Voice Interview & Job Recommendation System
 
-Crawler nhẹ nhàng để thu thập tin tuyển dụng **Data Analyst** trên TopCV, tự động ghép **chi tiết job** + **thông tin công ty** vào một **Pandas DataFrame**, xuất **CSV/XLSX**, và (mới) **orchestrate bằng Airflow**.
+> **Hệ thống Phỏng vấn Giọng nói AI Real-time và Gợi ý Việc làm Thông minh**  
+> Đồ án Tốt nghiệp ngành Công nghệ Thông tin.
 
----
-
-## 😎 Kiến trúc pipeline
-![Pipeline Architecture](imgs/00-architect.png)
-
----
-
-## ✅ Tính năng
-
-* Crawl từ trang search (đa trang).
-* Vào từng `job_url` lấy: mức lương, địa điểm, kinh nghiệm, deadline, mô tả/yêu cầu/quyền lợi, tag, địa chỉ & thời gian làm việc.
-* Vào `company_url` lấy: tên, website, quy mô, lĩnh vực, địa chỉ, mô tả.
-* Chống **429 Too Many Requests** bằng delay ngẫu nhiên.
-* Xuất **CSV/XLSX**.
-* **Airflow DAG** tự động hóa pipeline:
-  * B1: chạy scraper (Python script).
-  * B2: lưu CSV/XLSX.
-  * B3: đẩy dữ liệu lên Google Sheets.
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+![Vue.js](https://img.shields.io/badge/Frontend-Vue%203%20%7C%20Vite-4fc08d?logo=vuedotjs)
+![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?logo=nodedotjs)
+![Python](https://img.shields.io/badge/AI%20Service-Python%20%7C%20gRPC-3776ab?logo=python)
+![Gemini](https://img.shields.io/badge/Vision%20AI-Google%20Gemini-8e44ad?logo=google)
 
 ---
 
-## 🧱 Cấu trúc project
+## 📌 1. Giới thiệu Tổng quan (System Overview)
 
-```
-
-.
-├── airflow
-│   ├── dags/                  # DAGs (run\_scrape\_topcv\_\*.py)
-│   ├── docker-compose.yaml    # Compose stack
-│   ├── Dockerfile             # Custom Airflow image
-│   ├── requirements.txt       # Thư viện cài thêm trong Airflow
-│   └── logs/                  # Logs của Airflow
-├── scripts/
-│   ├── scrape\_topcv\_company.py  # Script crawl chính
-│   └── topcv.ipynb              # Notebook thử nghiệm
-├── data-files/
-│   ├── topcv\_data\_analyst\_jobs.csv
-│   ├── topcv\_data\_analyst\_jobs.xlsx
-│   └── \~\$topcv\_data\_analyst\_jobs.xlsx
-├── credentials/
-│   └── google-service-account-sample.json  # Service Account cho Google Sheets: https://cloud.google.com/iam/docs/service-accounts-create
-├── imgs/                         # Hình minh họa
-│   ├── 00-architect.png
-│   ├── 01-excel.png
-│   └── 02-airflow\.png
-├── pyproject.toml
-├── uv.lock
-└── README.md
-
-````
+Hệ thống hỗ trợ ứng viên rèn luyện kỹ năng phỏng vấn thông qua trí tuệ nhân tạo (AI) và tìm kiếm công việc phù hợp với năng lực cá nhân. Hệ thống kết hợp nhiều công nghệ hiện đại bao gồm:
+- **Phỏng vấn Giọng nói Real-time (Voice AI):** Tương tác 2 chiều qua Micro và Loa bằng giọng nói tự nhiên nhờ sự kết hợp giữa Web Speech API, DeepSeek AI và giao thức gRPC tốc độ cao.
+- **Phân tích Tác phong qua Webcam:** Sử dụng **Gemini Vision API** tự động phân tích biểu cảm, tư thế ngồi và ánh mắt của ứng viên theo thời gian thực trong suốt buổi phỏng vấn.
+- **Phân tích CV & Gợi ý Việc làm:** Tự động trích xuất kỹ năng từ file CV (PDF) của ứng viên và đề xuất các bài tuyển dụng phù hợp nhất.
+- **Tự động Cào Dữ liệu (Automated Crawler):** Hệ thống thu thập tin tuyển dụng tự động từ các nền tảng tuyển dụng hàng đầu (TopCV, ITViec, Glints...) và tự động làm sạch dữ liệu.
 
 ---
 
-## 📸 Hình minh họa kết quả
+## 🏗️ 2. Kiến trúc Hệ thống (System Architecture)
 
-### Kết quả CSV/XLSX
-![Excel Output](imgs/01-excel.png)
+Hệ thống được thiết kế theo mô hình **Microservices** giúp tối ưu hiệu năng và khả năng mở rộng:
 
-### Kết quả Google Sheets
-![Google Sheets Output](imgs/02-google-sheets.png)
+```text
+                               ┌────────────────────────────────┐
+                               │     Vue 3 + Vite Frontend      │
+                               │  (Web Speech API, Canvas UI)   │
+                               └───────────────┬────────────────┘
+                                               │
+                                       HTTP / WebSocket
+                                               │
+                                               ▼
+                               ┌────────────────────────────────┐
+                               │     Node.js Express Backend    │
+                               │  (REST API, Auth, DB Gateway)  │
+                               └──────┬──────────────────┬──────┘
+                                      │                  │
+                         gRPC Stream  │                  │  REST / Base64
+                          (HTTP/2)    │                  │
+                                      ▼                  ▼
+┌────────────────────────────────────────┐            ┌────────────────────────────────┐
+│      Python AI gRPC Microservice       │            │       Google Gemini Vision     │
+│   (DeepSeek LLM Conversation Engine)   │            │   (Real-time Posture Analysis) │
+└────────────────────────────────────────┘            └────────────────────────────────┘
+🛠️ 3. Công nghệ Sử dụng (Tech Stack)
+Frontend
+Framework: Vue.js 3 (Vite), Pinia, Vue Router
 
-### Airflow DAG
-![Airflow DAG](imgs/03-airflow.png)
+UI & Charts: TailwindCSS, Chart.js / Recharts
 
----
+Media API: HTML5 Web Speech API (STT/TTS), HTML5 Canvas Webcam Streaming
 
-## 🛠️ Yêu cầu
+Core Backend
+Runtime: Node.js / Express
 
-* Python 3.8+  
-* [uv](https://github.com/astral-sh/uv) (quản lý môi trường & dependency)  
-* (Tuỳ chọn) Google Chrome + ChromeDriver nếu bạn dùng Selenium thay vì `requests`/`BeautifulSoup`.
+Database: PostgreSQL / MongoDB (Sequelize / Mongoose ORM)
 
----
+Protocol: RESTful API, WebSockets, gRPC Client
 
-## 🚀 Bắt đầu
+AI & Data Service
+Language: Python 3.10+
 
-### Bước 1 — Khởi tạo dự án với **uv**
+Microservice Communication: gRPC / Protocol Buffers (.proto)
 
-```bash
-uv init crawl-topcv-jobs
-cd crawl-topcv-jobs
-````
+LLM Engine: DeepSeek API
 
-### Bước 2 — Cài thư viện
+Vision AI: Google Gemini 1.5 Flash Vision API
 
-> Script chính dùng `requests`, `beautifulsoup4`, `lxml`, `pandas`.
-> Bạn có thể cài thêm các lib phục vụ phân tích (matplotlib, seaborn) hoặc Selenium nếu cần.
+Crawler: Python BeautifulSoup4, Scrapy, Cronjob Automation
 
-```bash
-# Core crawl + phân tích
-uv add requests beautifulsoup4 lxml pandas
+📂 4. Cấu trúc Thư mục Dự án (Project Structure)
+Plaintext
+├── backend/                  # Core Backend Node.js / Express
+│   ├── src/
+│   │   ├── controllers/      # Route Controllers
+│   │   ├── models/           # Database Models
+│   │   ├── routes/           # REST API Routes
+│   │   └── services/         # gRPC Client & External Integrations
+│   ├── .env.example          # Environment Variables Template
+│   └── server.js             # Entry Point
+│
+├── ai-service/               # Python gRPC Microservice & Vision AI
+│   ├── protos/               # Protocol Buffer files (.proto)
+│   ├── services/             # DeepSeek & Gemini Integration
+│   ├── main.py               # gRPC Server Entry Point
+│   └── requirements.txt      # Python Dependencies
+│
+├── crawler/                  # Automated Job Crawler
+│   ├── scrapers/             # Web Crawlers (TopCV, ITViec...)
+│   ├── cron_expire_jobs.py   # Background job cleaner
+│   └── main.py               # Crawler Runner Script
+│
+└── frontend/                 # Vue 3 Vite Client
+    ├── src/
+    │   ├── components/       # Reusable UI Components
+    │   ├── views/            # Main Page Views
+    │   └── stores/           # Pinia State Management
+    └── vite.config.js
+⚙️ 5. Hướng dẫn Cài đặt & Khởi chạy (Getting Started)
+Yêu cầu Hệ thống (Prerequisites)
+Node.js version 18.x trở lên
 
-# Tuỳ chọn (phân tích/plot, notebook, selenium)
-uv add matplotlib seaborn ipykernel selenium webdriver-manager
-```
+Python version 3.10 trở lên
 
-### (Tuỳ chọn) Đẩy code lên GitHub
+Database (PostgreSQL) đang khởi chạy
 
-```bash
-gh auth login
-gh repo create crawl-topcv-jobs --private --source=. --remote=origin --push
-```
+Bước 1: Khởi chạy Python AI gRPC Service
+Bash
+cd ai-service
 
-### Bước 3 — (Tuỳ chọn) Cài Chrome cho Selenium
+# Tạo môi trường ảo (Virtual environment)
+python -m venv venv
+source venv/bin/activate  # Trên Windows: venv\Scripts\activate
 
-> Không bắt buộc nếu bạn chỉ dùng `requests` + `BeautifulSoup`.
+# Cài đặt các thư viện phụ thuộc
+pip install -r requirements.txt
 
-```bash
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install ./google-chrome-stable_current_amd64.deb
-```
+# Khởi chạy gRPC Server
+python main.py
+Server AI sẽ chạy tại address: localhost:50051
 
----
+Bước 2: Khởi chạy Node.js Core Backend
+Bash
+cd backend
 
-## ▶️ Chạy crawler
+# Cài đặt dependencies
+npm install
 
-Script mặc định crawl trang:
+# Tạo file cấu hình môi trường
+cp .env.example .env
+# Chỉnh sửa các thông số DATABASE_URL, GEMINI_API_KEY, DEEPSEEK_API_KEY trong file .env
 
-```
-https://www.topcv.vn/tim-viec-lam-data-analyst?type_keyword=1&page={page}&sba=1
-```
+# Khởi chạy Server Backend
+npm run dev
+Server Backend sẽ chạy tại address: http://localhost:3000
 
-Chạy:
+Bước 3: Khởi chạy Vue 3 Frontend
+Bash
+cd frontend
 
-```bash
-cd scripts
-uv run scrape_topcv_company.py
-```
+# Cài đặt dependencies
+npm install
 
-Kết quả:
+# Khởi chạy Frontend Development
+npm run dev
+Truy cập giao diện ứng dụng tại: http://localhost:5173
 
-* In ra `head()` của DataFrame
-* Lưu `topcv_data_analyst_jobs.csv` (UTF-8-SIG) trong thư mục `data-files/`
+🕰️ 6. Cấu hình Tác vụ Cào Data Tự động (Crawler Cronjob)
+Để hệ thống tự động cào tin tuyển dụng mới và làm sạch dữ liệu định kỳ mỗi ngày vào 02:00 AM, cấu hình Cronjob trên Server/Máy tính như sau:
 
-> Muốn đổi số trang, sửa nhanh trong `__main__`:
+Bash
+# Mở trình chỉnh sửa crontab
+crontab -e
 
-```python
-qtpl = "https://www.topcv.vn/tim-viec-lam-data-analyst?type_keyword=1&page={page}&sba=1"
-df = crawl_to_dataframe(qtpl, start_page=1, end_page=10, delay_between_pages=(0.5, 1.0))
-```
+📝 7. Giấy phép & Tác giả (License & Author)
+Tác giả: Đồ án Tốt nghiệp Đại học
 
----
-
-## ⚙️ Điều chỉnh tốc độ (để tránh 429)
-
-Script có hai “điểm nghỉ”:
-
-* `smart_sleep(0.5, 1.0)` → nghỉ ngẫu nhiên **0.5–1.0s** giữa các request (job/company).
-* `delay_between_pages=(0.5, 1.0)` → nghỉ **0.5–1.0s** giữa các **trang search**.
-
-> Nếu vẫn bị 429:
-
-* Tăng delay (ví dụ `smart_sleep(1, 2)`, `delay_between_pages=(2, 3)`).
-* Thu hẹp số trang; chạy ngoài giờ cao điểm; dùng IP/proxy hợp lệ.
-* Tái sử dụng `requests.Session()` (đã làm sẵn) để giữ cookie.
-* Tôn trọng robots & điều khoản website.
-
----
-
-## 🧪 Mẫu sử dụng DataFrame
-
-Mở rộng trong notebook hoặc script khác:
-
-```python
-import pandas as pd
-
-df = pd.read_csv("topcv_data_analyst_jobs.csv")
-print(df.shape)
-print(df.columns)
-
-# Lọc job ở TP.HCM, có “Python” trong mô tả yêu cầu
-mask_hcm = df["detail_location"].fillna("").str.contains("Hồ Chí Minh", case=False)
-mask_py  = df["desc_yeucau"].fillna("").str.contains("Python", case=False)
-df_filtered = df[mask_hcm & mask_py]
-df_filtered.head()
-```
-
-Xuất XLSX:
-
-```python
-df.to_excel("topcv_data_analyst_jobs.xlsx", index=False)
-```
-
----
-
-## 🚀 Orchestration với Airflow
-
-Repo đi kèm stack Airflow (Docker Compose).
-
-Chạy:
-
-```bash
-cd airflow
-docker compose up -d
-```
-
-Airflow sẽ khởi động (web UI [http://localhost:8080](http://localhost:8080)).
-Trong UI, bật DAG **`topcv_pipeline_daily_v2`** hoặc **v3** để pipeline tự động:
-
-* `run_scraper_with_uv` → chạy script crawl.
-* `save_csv_and_xlsx` → đảm bảo CSV, chuyển sang XLSX.
-* `upload_to_google_sheets` → đẩy dữ liệu lên Google Sheets (qua Service Account).
-
----
-
-## 🗺️ Hướng mở rộng
-
-* Chuẩn hóa dữ liệu (địa điểm, lương).
-* Crawl thêm từ khóa khác (Data Engineer, BI, ML…).
-* Lưu DB (Postgres) thay vì file.
-* Dashboard bằng Power BI/Metabase.
-* Tự động phân tích thị trường tuyển dụng từ dữ liệu đã crawl.
-
----
-
-## 📄 License
-
-MIT — dùng cho mục đích học tập & nghiên cứu.
-⚠️ Tôn trọng điều khoản sử dụng của TopCV, không gây tải nặng.
-
-```
-
----
+Giấy phép: MIT License
