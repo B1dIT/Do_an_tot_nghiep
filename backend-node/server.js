@@ -11,7 +11,7 @@ const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 const pool = require('./src/config/db');
 const authRoutes = require('./src/routes/auth.routes');
-const adminRoutes = require('./src/routes/admin.routes'); 
+const adminRoutes = require('./src/routes/Admin.routes'); 
 const { verifyToken } = require('./src/middleware/auth.middleware');
 const app = express();
 
