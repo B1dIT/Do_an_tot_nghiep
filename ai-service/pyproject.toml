@@ -1,9 +1,9 @@
 [project]
 name = "crawl-topcv-jobs"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI Voice Interview & Job Portal Platform"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "beautifulsoup4>=4.13.5",
     "bs4>=0.0.2",
@@ -17,4 +17,12 @@ dependencies = [
     "seaborn>=0.13.2",
     "selenium>=4.27.1",
     "webdriver-manager>=4.0.2",
+    "grpcio>=1.60.0",
+    "grpcio-tools>=1.60.0",
+    "google-genai>=1.0.0",
+    "psycopg2-binary>=2.9.9",
+    "sqlalchemy>=2.0.0",
 ]
+
+[project.scripts]
+grpc-server = "python_grpc_server:serve"

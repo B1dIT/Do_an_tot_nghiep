@@ -3,7 +3,7 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 
-const PROTO_PATH = path.join(__dirname, '..', 'protos', 'recommend.proto');
+const PROTO_PATH = path.join(__dirname, '..', 'ai-service', 'protos', 'recommend.proto');
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
     keepCase: true,
@@ -16,7 +16,7 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const ai_proto = grpc.loadPackageDefinition(packageDefinition).ai_service;
 
 const client = new ai_proto.CVRecommender(
-    'localhost:50051',
+    process.env.PYTHON_GRPC_URL || 'localhost:50051',
     grpc.credentials.createInsecure()
 );
 

@@ -696,7 +696,7 @@ async function saveInterviewResult() {
   const knowledgeScore = Math.min(100, conversationPairs.value.length * 20)
 
   try {
-    await fetch('http://localhost:3000/api/interviews', {
+    await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/interviews', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

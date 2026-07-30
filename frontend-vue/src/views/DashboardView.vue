@@ -459,8 +459,8 @@ onMounted(async () => {
   isLoadingStats.value = true
   try {
     const [dashboardRes, salaryRes] = await Promise.all([
-      fetch('http://localhost:3000/api/analytics/dashboard'),
-      fetch('http://localhost:3000/api/analytics/salary'),
+      fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/analytics/dashboard'),
+      fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/analytics/salary'),
     ])
 
     if (dashboardRes.ok) {

@@ -313,7 +313,7 @@ async function uploadCV() {
   formData.append('cv', selectedFile.value)
 
   try {
-    const response = await fetch('http://localhost:3000/api/uploads', {
+    const response = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/uploads', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${window.localStorage.getItem('auth_token') || window.sessionStorage.getItem('auth_token') || ''}`,

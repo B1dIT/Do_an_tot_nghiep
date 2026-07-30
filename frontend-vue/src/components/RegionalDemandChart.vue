@@ -18,7 +18,7 @@ const options = { responsive: true, maintainAspectRatio: false }
 
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/analytics/regions')
+    const response = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/analytics/regions')
     if (!response.ok) throw new Error(`Không thể tải dữ liệu khu vực: ${response.status}`)
     const data = await response.json()
     const visibleData = data.filter((item) => item.value > 0)

@@ -54,7 +54,7 @@ function toggleDataset(index) {
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/analytics/salary')
+    const res = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/analytics/salary')
     if (!res.ok) throw new Error(`Không thể tải dữ liệu lương: ${res.status}`)
     const data = await res.json()
     chartData.value = {

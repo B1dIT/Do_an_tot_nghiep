@@ -265,7 +265,7 @@ function getToken() { return sessionStorage.getItem('auth_token') || localStorag
 
 async function fetchSavedJobs() {
   try {
-    const res = await fetch('http://localhost:3000/api/saved-jobs', {
+    const res = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/saved-jobs', {
       headers: { Authorization: `Bearer ${getToken()}` }
     })
     if (!res.ok) return
@@ -285,14 +285,14 @@ async function toggleSaveJob(job) {
   try {
     if (isSaved) {
       // Bỏ lưu: tìm id từ savedJobs call — dùng job_url
-      await fetch('http://localhost:3000/api/saved-jobs/by-url', {
+      await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/saved-jobs/by-url', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({ job_url: job.job_url }),
       })
       savedJobIds.value = new Set([...savedJobIds.value].filter((u) => u !== job.job_url))
     } else {
-      const res = await fetch('http://localhost:3000/api/saved-jobs', {
+      const res = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/saved-jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({
@@ -323,7 +323,7 @@ async function handleSearch() {
   expandedId.value = null
 
   try {
-    const res = await fetch(`http://localhost:3000/api/jobs/search?keyword=${encodeURIComponent(kw)}`)
+    const res = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/jobs/search?keyword=' + encodeURIComponent(kw))
     if (!res.ok) throw new Error(`Lỗi ${res.status}`)
     const data = await res.json()
     searchResults.value = data.jobs || []

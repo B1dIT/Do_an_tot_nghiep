@@ -128,7 +128,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 
-const API = 'http://localhost:3000'
+const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 const tabs = [
   { key: 'profile', label: 'Hồ sơ cá nhân', short: 'Hồ sơ' },

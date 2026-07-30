@@ -14,7 +14,21 @@ const authRoutes = require('./src/routes/auth.routes');
 const adminRoutes = require('./src/routes/admin.routes'); 
 const { verifyToken } = require('./src/middleware/auth.middleware');
 const app = express();
-app.use(cors());
+
+// ============================================================
+// CORS — configurable via FRONTEND_URL env var
+// ============================================================
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',').map(s => s.trim());
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (server-to-server, mobile apps, curl, etc.)
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        // Allow all localhost origins in development
+        if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
+}));
 app.use(express.json());
 const upload = multer({
     dest: 'uploads/',
@@ -26,10 +40,13 @@ const upload = multer({
         callback(null, true);
     }
 });
-const PROTO_PATH = path.join(__dirname, '..', 'protos', 'recommend.proto');
+const PROTO_PATH = path.join(__dirname, '..', 'ai-service', 'protos', 'recommend.proto');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, { keepCase: true });
 const ai_proto = grpc.loadPackageDefinition(packageDefinition).ai_service;
-const grpcClient = new ai_proto.AIService('localhost:50051', grpc.credentials.createInsecure());
+const grpcClient = new ai_proto.AIService(
+    process.env.PYTHON_GRPC_URL || 'localhost:50051',
+    grpc.credentials.createInsecure()
+);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -769,6 +786,6 @@ app.use('/api', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`✅ Node.js Gateway đang chạy tại http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Node.js Gateway running at http://0.0.0.0:${PORT}`);
 });

@@ -73,33 +73,57 @@ Vision AI: Google Gemini 1.5 Flash Vision API
 Crawler: Python BeautifulSoup4, Scrapy, Cronjob Automation
 
 📂 4. Cấu trúc Thư mục Dự án (Project Structure)
-Plaintext
-├── backend/                  # Core Backend Node.js / Express
+```text
+crawl-topcv-jobs-master/
+│
+├── frontend-vue/              # 🟢 Frontend (Vue 3 + Vite) — Deploy Vercel
 │   ├── src/
-│   │   ├── controllers/      # Route Controllers
-│   │   ├── models/           # Database Models
-│   │   ├── routes/           # REST API Routes
-│   │   └── services/         # gRPC Client & External Integrations
-│   ├── .env.example          # Environment Variables Template
-│   └── server.js             # Entry Point
+│   │   ├── components/        # Reusable UI Components
+│   │   ├── views/             # Main Page Views
+│   │   ├── services/          # VoiceInterview, GeminiVision services
+│   │   ├── utils/             # API config, helpers
+│   │   ├── router/            # Vue Router
+│   │   ├── layouts/           # App layout
+│   │   └── composables/       # Shared composables
+│   ├── .env.example
+│   ├── vite.config.js
+│   └── package.json
 │
-├── ai-service/               # Python gRPC Microservice & Vision AI
-│   ├── protos/               # Protocol Buffer files (.proto)
-│   ├── services/             # DeepSeek & Gemini Integration
-│   ├── main.py               # gRPC Server Entry Point
-│   └── requirements.txt      # Python Dependencies
+├── backend-node/              # 🔵 Backend API Gateway (Node.js + Express) — Deploy Render
+│   ├── src/
+│   │   ├── config/            # DB config
+│   │   ├── controllers/       # Auth & Admin controllers
+│   │   ├── middleware/         # JWT Auth middleware
+│   │   └── routes/            # REST API routes
+│   ├── .env.example
+│   ├── server.js              # Entry point
+│   └── package.json
 │
-├── crawler/                  # Automated Job Crawler
-│   ├── scrapers/             # Web Crawlers (TopCV, ITViec...)
-│   ├── cron_expire_jobs.py   # Background job cleaner
-│   └── main.py               # Crawler Runner Script
+├── ai-service/                # 🟣 Python AI & Crawler Service — Deploy Render
+│   ├── protos/                # Protocol Buffer files (.proto)
+│   ├── scripts/               # Crawlers & data processing
+│   │   ├── scrape_topcv.py
+│   │   ├── scrape_itviec.py
+│   │   ├── scrape_glints.py
+│   │   ├── database.py
+│   │   ├── data_cleaner.py
+│   │   ├── cron_expire_jobs.py
+│   │   └── main_runner.py
+│   ├── python_grpc_server.py  # gRPC server entry point
+│   ├── recommend_pb2.py       # Generated from proto
+│   ├── recommend_pb2_grpc.py  # Generated from proto
+│   ├── schema.sql
+│   ├── pyproject.toml
+│   └── uv.lock
 │
-└── frontend/                 # Vue 3 Vite Client
-    ├── src/
-    │   ├── components/       # Reusable UI Components
-    │   ├── views/            # Main Page Views
-    │   └── stores/           # Pinia State Management
-    └── vite.config.js
+├── docs/                      # 📄 Documentation & images
+│   ├── imgs/
+│   └── jobs_sample.json
+│
+├── credentials/               # Service account credentials
+├── .gitignore
+└── README.md
+```
 ⚙️ 5. Hướng dẫn Cài đặt & Khởi chạy (Getting Started)
 Yêu cầu Hệ thống (Prerequisites)
 Node.js version 18.x trở lên
@@ -108,8 +132,8 @@ Python version 3.10 trở lên
 
 Database (PostgreSQL) đang khởi chạy
 
-Bước 1: Khởi chạy Python AI gRPC Service
-Bash
+### Bước 1: Khởi chạy Python AI gRPC Service
+```bash
 cd ai-service
 
 # Tạo môi trường ảo (Virtual environment)
@@ -117,37 +141,40 @@ python -m venv venv
 source venv/bin/activate  # Trên Windows: venv\Scripts\activate
 
 # Cài đặt các thư viện phụ thuộc
-pip install -r requirements.txt
+pip install -e .
 
 # Khởi chạy gRPC Server
-python main.py
-Server AI sẽ chạy tại address: localhost:50051
+python python_grpc_server.py
+```
+AI Service sẽ chạy tại address: `localhost:50051`
 
-Bước 2: Khởi chạy Node.js Core Backend
-Bash
-cd backend
+### Bước 2: Khởi chạy Node.js Backend
+```bash
+cd backend-node
 
 # Cài đặt dependencies
 npm install
 
 # Tạo file cấu hình môi trường
 cp .env.example .env
-# Chỉnh sửa các thông số DATABASE_URL, GEMINI_API_KEY, DEEPSEEK_API_KEY trong file .env
+# Chỉnh sửa các thông số trong file .env
 
 # Khởi chạy Server Backend
-npm run dev
-Server Backend sẽ chạy tại address: http://localhost:3000
+npm start
+```
+Server Backend sẽ chạy tại address: `http://localhost:3000`
 
-Bước 3: Khởi chạy Vue 3 Frontend
-Bash
-cd frontend
+### Bước 3: Khởi chạy Vue 3 Frontend
+```bash
+cd frontend-vue
 
 # Cài đặt dependencies
 npm install
 
 # Khởi chạy Frontend Development
 npm run dev
-Truy cập giao diện ứng dụng tại: http://localhost:5173
+```
+Truy cập giao diện ứng dụng tại: `http://localhost:5173`
 
 🕰️ 6. Cấu hình Tác vụ Cào Data Tự động (Crawler Cronjob)
 Để hệ thống tự động cào tin tuyển dụng mới và làm sạch dữ liệu định kỳ mỗi ngày vào 02:00 AM, cấu hình Cronjob trên Server/Máy tính như sau:

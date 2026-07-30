@@ -324,8 +324,8 @@ async function submitUserForm() {
   try {
     const response = await fetch(
       isEditing
-        ? `http://localhost:3000/api/admin/users/${editingUser.value.id}`
-        : 'http://localhost:3000/api/admin/users',
+        ? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/admin/users/' + editingUser.value.id
+        : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/admin/users',
       {
         method: isEditing ? 'PATCH' : 'POST',
         headers: getAuthHeaders(),
@@ -348,7 +348,7 @@ async function deleteUser(userItem) {
   if (!window.confirm(`Bạn có chắc muốn xóa tài khoản ${userItem.email}?`)) return
 
   try {
-    const response = await fetch(`http://localhost:3000/api/admin/users/${userItem.id}`, {
+    const response = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/admin/users/' + userItem.id, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     })
@@ -375,7 +375,7 @@ async function fetchUserList() {
     window.localStorage.getItem('auth_token') || window.sessionStorage.getItem('auth_token')
 
   try {
-    const response = await fetch('http://localhost:3000/api/admin/users', {
+    const response = await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') + '/api/admin/users', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,

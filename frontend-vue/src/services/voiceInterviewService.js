@@ -24,7 +24,7 @@
 // CẤU HÌNH
 // ============================================================
 // Backend Node.js gateway — mọi request AI đều qua đây
-const BACKEND_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const BACKEND_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 // System Prompt cố định cho Nhà tuyển dụng AI
 const SYSTEM_PROMPT = `Bạn là một Nhà tuyển dụng Tech Lead senior.

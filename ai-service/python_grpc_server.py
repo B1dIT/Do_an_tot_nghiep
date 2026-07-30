@@ -21,7 +21,7 @@ import recommend_pb2_grpc
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _env_loaded = load_dotenv(os.path.join(_script_dir, '.env'))
 if not _env_loaded:
-    _env_loaded = load_dotenv(os.path.join(_script_dir, 'backend-node', '.env'))
+    _env_loaded = load_dotenv(os.path.join(_script_dir, '..', 'backend-node', '.env'))
     if not _env_loaded:
         # Default (CWD) if above paths don't exist
         load_dotenv()
@@ -31,6 +31,13 @@ if GEMINI_API_KEY:
     print(f"[Config] GEMINI_API_KEY loaded from .env")
 else:
     print(f"[Config] GEMINI_API_KEY not found in .env — Gemini unavailable.")
+
+# Database config from environment
+DB_NAME = os.getenv("DB_NAME", "do_an_tot_nghiep")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "160105")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
     
 client = genai.Client(api_key=GEMINI_API_KEY)
 interview_sessions = {}
@@ -38,11 +45,11 @@ interview_sessions = {}
 def get_jobs_from_db():
     try:
         conn = psycopg2.connect(
-            dbname="do_an_tot_nghiep",
-            user="postgres",
-            password="160105",
-            host="localhost",
-            port="5432"
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT
         )
         cursor = conn.cursor()
         cursor.execute("""
@@ -289,12 +296,13 @@ class AIServiceServicer(recommend_pb2_grpc.AIServiceServicer):
             )
 
 def serve():
+    grpc_port = os.getenv("GRPC_PORT", "50051")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     recommend_pb2_grpc.add_AIServiceServicer_to_server(AIServiceServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port(f'0.0.0.0:{grpc_port}')
     server.start()
     print("=" * 50)
-    print("Python gRPC Server running on port 50051...", flush=True)
+    print(f"Python gRPC Server running on port {grpc_port}...", flush=True)
     print("=" * 50)
     server.wait_for_termination()
 
